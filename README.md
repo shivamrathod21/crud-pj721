@@ -1,6 +1,6 @@
 # Task Manager Application
 
-A full-stack Task Manager application built with Flask and Docker, deployed on AWS EC2.
+A full-stack Task Manager application built with Flask Html Java script and deployed with Docker on AWS EC2.
 
 ## Features
 - Create, Read, Update, and Delete tasks
