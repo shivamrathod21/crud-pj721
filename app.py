@@ -9,7 +9,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__)
 CORS(app)
 
 # Configure SQLite database
@@ -38,10 +38,13 @@ class Task(db.Model):
 with app.app_context():
     db.create_all()
 
-# Serve static files
 @app.route('/')
 def index():
     return send_from_directory('static', 'index.html')
+
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('static', path)
 
 # API Routes
 @app.route('/api/tasks', methods=['GET'])
@@ -85,7 +88,6 @@ def delete_task(task_id):
 
 if __name__ == '__main__':
     logger.info("Starting Flask application...")
-    logger.info("Static folder is set to: %s", app.static_folder)
-    port = 8080  # Changed port to 8080
+    port = 8080
     logger.info("Server will run on port: %d", port)
     app.run(host='0.0.0.0', port=port, debug=True)
