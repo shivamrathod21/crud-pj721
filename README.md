@@ -1,75 +1,90 @@
 # Task Manager Application
 
-A simple CRUD application built with Flask and modern frontend technologies.
+A full-stack Task Manager application built with Flask and Docker, deployed on AWS EC2.
 
 ## Features
-
 - Create, Read, Update, and Delete tasks
-- Modern, responsive UI
-- RESTful API backend
-- Docker support
-- Ready for AWS deployment
+- Persistent data storage using SQLite
+- Modern UI with Bootstrap
+- Containerized with Docker
+- Deployed on AWS EC2
 
-## Local Development Setup
+## Prerequisites
+- AWS Account
+- EC2 Instance (Ubuntu)
+- Docker installed
+- Git installed
 
-1. Create a virtual environment:
+## Deployment Steps
+
+1. **Connect to EC2 Instance**
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+ssh -i your-key.pem ubuntu@your-ec2-ip
 ```
 
-2. Install dependencies:
+2. **Install Docker (if not installed)**
 ```bash
-pip install -r requirements.txt
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo usermod -aG docker ubuntu
+newgrp docker
 ```
 
-3. Run the application:
+3. **Clone the Repository**
 ```bash
-python app.py
+git clone https://github.com/shivamrathod21/crud-pj721.git
+cd crud-pj721
 ```
 
-The application will be available at http://localhost:5000
+4. **Create Data Directory**
+```bash
+mkdir -p ~/task-manager-data
+sudo chown ubuntu:ubuntu ~/task-manager-data
+```
 
-## Docker Setup
-
-1. Build the Docker image:
+5. **Build and Run Docker Container**
 ```bash
 docker build -t task-manager .
+docker run -d -p 8080:8080 -v ~/task-manager-data:/app/instance task-manager
 ```
 
-2. Run the container:
+6. **Access the Application**
+- Open your browser and visit: `http://your-ec2-ip:8080`
+
+## Security Configuration
+Make sure to configure your EC2 security group to allow:
+- SSH (Port 22)
+- Custom TCP (Port 8080)
+
+## Troubleshooting
+
+If the container stops or you need to restart:
 ```bash
-docker run -p 5000:5000 task-manager
+# Stop existing container
+docker stop $(docker ps -q)
+docker rm $(docker ps -a -q)
+
+# Rebuild and run
+docker build -t task-manager .
+docker run -d -p 8080:8080 -v ~/task-manager-data:/app/instance task-manager
 ```
 
-## AWS Deployment
-
-To deploy to AWS:
-
-1. Create an ECR repository
-2. Push the Docker image to ECR
-3. Deploy using ECS or EKS
-
-Detailed AWS deployment instructions:
-
-1. Install and configure AWS CLI
-2. Authenticate Docker to ECR:
+To view logs:
 ```bash
-aws ecr get-login-password --region your-region | docker login --username AWS --password-stdin your-account-id.dkr.ecr.your-region.amazonaws.com
+docker logs $(docker ps -q)
 ```
 
-3. Tag and push the image:
+To view stored tasks:
 ```bash
-docker tag task-manager:latest your-account-id.dkr.ecr.your-region.amazonaws.com/task-manager:latest
-docker push your-account-id.dkr.ecr.your-region.amazonaws.com/task-manager:latest
+sqlite3 ~/task-manager-data/tasks.db ".mode column" ".headers on" "SELECT * FROM task;"
 ```
 
-4. Create an ECS cluster and service to run the container
+## Technologies Used
+- Backend: Python Flask
+- Database: SQLite
+- Frontend: HTML, CSS, JavaScript, Bootstrap
+- Containerization: Docker
+- Deployment: AWS EC2
 
-## API Endpoints
-
-- GET /api/tasks - List all tasks
-- POST /api/tasks - Create a new task
-- GET /api/tasks/<id> - Get a specific task
-- PUT /api/tasks/<id> - Update a task
-- DELETE /api/tasks/<id> - Delete a task
+## Contributing
+Feel free to fork this repository and submit pull requests!
